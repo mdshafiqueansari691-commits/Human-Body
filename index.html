@@ -1,46 +1,303 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virtual Human Body</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Real Human Body Anatomy Lab</title>
+
 <style>
-body {
-  background: #101827;
-  color: white;
-  font-family: Arial;
-  text-align: center;
-  padding: 20px;
+*{box-sizing:border-box}
+body{
+ margin:0;background:#07111e;color:white;
+ font-family:Arial,sans-serif;text-align:center
 }
-h1 {color: #00d9ff;}
-a {
-  display: block;
-  background: #1e3450;
-  color: white;
-  text-decoration: none;
-  padding: 16px;
-  margin: 12px auto;
-  border-radius: 12px;
-  max-width: 400px;
+header{padding:20px;background:#10263c}
+h1{color:#36d9ff;margin:5px}
+.subtitle{color:#a9c5d8;font-size:13px}
+.container{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;padding:15px}
+.bodybox{
+ background:#102033;border:1px solid #24465d;
+ border-radius:18px;padding:10px;width:min(100%,430px)
 }
-a:hover {background: #087eaa;}
+svg{width:100%;height:auto;max-height:850px}
+.silhouette{
+ fill:#bdcbd8;fill-opacity:.13;
+ stroke:#8fa9bc;stroke-width:2
+}
+.organ{
+ stroke:#fff;stroke-width:1.5;
+ cursor:pointer;transition:.2s
+}
+.organ:hover{filter:brightness(1.7);stroke:#fff;stroke-width:3}
+#details{
+ background:#102033;border:1px solid #31536d;
+ border-radius:18px;padding:22px;
+ width:min(100%,380px);text-align:left;
+ align-self:flex-start;min-height:250px
+}
+#details h2{color:#38dfff;margin-top:0}
+#details p{line-height:1.6;color:#d3e3ee}
+button{
+ background:#08a9d5;color:white;border:0;
+ padding:12px 18px;border-radius:9px;
+ font-weight:bold;cursor:pointer;margin-top:10px
+}
+.label{font-size:10px;fill:white;pointer-events:none}
+.legend{color:#a9c5d8;font-size:12px;margin:12px}
+footer{padding:20px;color:#8ba9bf}
 </style>
 </head>
-<body>
-<h1>🫀 Virtual Human Body</h1>
-<p>Explore Human Body Organs</p>
 
-<a href="Heart.html">❤️ Human Heart</a>
-<a href="Brain.html">🧠 Human Brain</a>
-<a href="Lungs.html">🫁 Human Lungs</a>
-<a href="Liver.html">Human Liver</a>
-<a href="Kidney.html">Human Kidney</a>
-<a href="Stomach.html">Human Stomach</a>
-<a href="Pancreas.html">Pancreas</a>
-<a href="Bladder.html">Urinary Bladder</a>
-<a href="Muscles.html">Human Muscles</a>
-<a href="Skin.html">Human Skin</a>
-<a href="Skaleten.html">Human Skeleton</a>
+<body>
+
+<header>
+<h1>🧬 HUMAN ANATOMY LAB</h1>
+<div class="subtitle">Interactive Human Body & Organ Explorer</div>
+</header>
+
+<div class="container">
+
+<div class="bodybox">
+<h3>Human Body – Front View</h3>
+
+<svg viewBox="0 0 400 850">
+
+<!-- Human Body Outline -->
+<g class="silhouette">
+<circle cx="200" cy="75" r="48"/>
+<path d="
+M160 125 Q130 135 120 170
+L95 290 L115 305 L145 220
+L145 350 L130 500 L120 690
+L150 690 L175 510 L200 530
+L225 510 L250 690 L280 690
+L270 500 L255 350 L255 220
+L285 305 L305 290 L280 170
+Q270 135 240 125
+Z"/>
+</g>
+
+<!-- Brain -->
+<path class="organ" fill="#e89ab8"
+d="M173 48 Q153 25 164 14 Q180 2 193 17
+Q208 1 225 17 Q242 35 226 57
+Q210 76 180 64 Z"
+onclick="show('Brain')"/>
+
+<!-- Thyroid -->
+<path class="organ" fill="#e8a24b"
+d="M185 119 Q174 107 180 102 Q190 100 200 110
+Q210 100 220 102 Q226 111 215 119 L200 128Z"
+onclick="show('Thyroid')"/>
+
+<!-- Lungs -->
+<path class="organ" fill="#e85d78"
+d="M190 155 Q155 130 146 172 Q130 220 165 255
+Q188 268 194 230 L198 165Z"
+onclick="show('Lungs')"/>
+
+<path class="organ" fill="#e85d78"
+d="M210 155 Q245 130 254 172 Q270 220 235 255
+Q212 268 206 230 L202 165Z"
+onclick="show('Lungs')"/>
+
+<!-- Heart -->
+<path class="organ" fill="#ff354f"
+d="M200 182 C170 150 151 190 177 219
+L200 245 L225 219 C250 190 230 150 200 182Z"
+onclick="show('Heart')"/>
+
+<!-- Liver -->
+<path class="organ" fill="#a94c2f"
+d="M143 275 Q155 245 192 260
+L201 294 Q178 325 145 310 Q130 300 143 275Z"
+onclick="show('Liver')"/>
+
+<!-- Stomach -->
+<path class="organ" fill="#e6a34c"
+d="M215 265 Q245 250 252 280
+Q267 320 235 330 Q210 332 210 300
+Q203 280 215 265Z"
+onclick="show('Stomach')"/>
+
+<!-- Pancreas -->
+<path class="organ" fill="#e9cf65"
+d="M177 330 Q205 317 237 333
+Q227 348 190 344Z"
+onclick="show('Pancreas')"/>
+
+<!-- Kidneys -->
+<path class="organ" fill="#9e4eae"
+d="M145 340 Q120 332 124 365 Q130 390 151 378 Q163 355 145 340Z"
+onclick="show('Kidneys')"/>
+
+<path class="organ" fill="#9e4eae"
+d="M255 340 Q280 332 276 365 Q270 390 249 378 Q237 355 255 340Z"
+onclick="show('Kidneys')"/>
+
+<!-- Large Intestine -->
+<path class="organ" fill="none" stroke="#e6a04b"
+stroke-width="13" stroke-linecap="round"
+d="M163 360 Q150 350 151 380 L151 430
+Q151 450 173 450 L227 450
+Q249 450 249 430 L249 380 Q249 350 237 360"
+onclick="show('Large Intestine')"/>
+
+<!-- Small Intestine -->
+<path class="organ" fill="none" stroke="#e9d17c"
+stroke-width="9" stroke-linecap="round"
+d="M170 377 Q215 360 225 380
+Q240 395 215 400 Q175 395 175 412
+Q170 435 220 430 Q240 420 225 410
+Q200 400 185 420"
+onclick="show('Small Intestine')"/>
+
+<!-- Bladder -->
+<path class="organ" fill="#52a8ec"
+d="M181 470 Q200 452 219 470
+Q229 500 200 510 Q171 500 181 470Z"
+onclick="show('Bladder')"/>
+
+<!-- Skeleton -->
+<g class="organ" fill="none" stroke="#f1e6c8"
+stroke-width="5" opacity=".75"
+onclick="show('Skeleton')">
+<path d="M200 125 L200 460 M175 155 L225 155
+M170 170 L230 170 M165 185 L235 185
+M165 200 L235 200 M165 215 L235 215
+M165 230 L235 230 M175 245 L225 245
+M175 265 L225 265 M200 460 L175 530
+M200 460 L225 530"/>
+</g>
+
+<!-- Muscles -->
+<g class="organ" fill="#bd5b52" opacity=".65"
+onclick="show('Muscles')">
+<path d="M145 155 Q125 155 120 190 L145 230 L160 190Z"/>
+<path d="M255 155 Q275 155 280 190 L255 230 L240 190Z"/>
+<path d="M160 470 L178 510 L165 650 L140 650Z"/>
+<path d="M240 470 L222 510 L235 650 L260 650Z"/>
+</g>
+
+<!-- Skin layer -->
+<path d="M160 125 Q130 135 120 170
+L95 290 L115 305 L145 220
+L145 350 L130 500 L120 690
+L150 690 L175 510 L200 530
+L225 510 L250 690 L280 690
+L270 500 L255 350 L255 220
+L285 305 L305 290 L280 170
+Q270 135 240 125"
+fill="none" stroke="#65d6ff" stroke-width="3"
+stroke-dasharray="5 4" style="cursor:pointer"
+onclick="show('Skin')"/>
+
+</svg>
+
+<div class="legend">
+🔴 Click on any colored organ to explore it.
+</div>
+</div>
+
+<div id="details">
+<h2>Welcome to Anatomy Lab 🧬</h2>
+<p>Select any organ in the human body illustration to explore its function, structure and role in the human body.</p>
+<p><b>Educational Anatomy Explorer</b></p>
+</div>
+
+</div>
+
+<footer>
+Human Anatomy Virtual Lab | Educational Project
+</footer>
+
+<script>
+const organs = {
+Brain:{
+icon:"🧠",name:"Human Brain",
+info:"The brain controls thinking, memory, emotions, movement, senses and many automatic body functions.",
+function:"Controls the nervous system and coordinates body activities."
+},
+Heart:{
+icon:"❤️",name:"Human Heart",
+info:"The heart is a muscular organ that pumps blood throughout the body.",
+function:"Supplies oxygen-rich blood and maintains circulation."
+},
+Lungs:{
+icon:"🫁",name:"Human Lungs",
+info:"The lungs are a pair of breathing organs inside the chest.",
+function:"Take oxygen into the blood and remove carbon dioxide."
+},
+Liver:{
+icon:"🟤",name:"Human Liver",
+info:"The liver is a large organ in the upper right abdomen.",
+function:"Processes nutrients, produces bile and helps remove harmful substances."
+},
+Stomach:{
+icon:"🫃",name:"Human Stomach",
+info:"The stomach is a muscular digestive organ.",
+function:"Mixes food with acid and enzymes to begin digestion."
+},
+Pancreas:{
+icon:"🟡",name:"Pancreas",
+info:"The pancreas is located behind the stomach.",
+function:"Produces digestive enzymes and hormones such as insulin."
+},
+Kidneys:{
+icon:"🫘",name:"Human Kidneys",
+info:"Two bean-shaped organs located toward the back of the abdomen.",
+function:"Filter blood, remove waste and regulate fluid balance."
+},
+"Small Intestine":{
+icon:"〰️",name:"Small Intestine",
+info:"A long, coiled tube in the digestive system.",
+function:"Completes much of digestion and absorbs nutrients."
+},
+"Large Intestine":{
+icon:"➰",name:"Large Intestine",
+info:"The large intestine surrounds much of the small intestine.",
+function:"Absorbs water and forms stool."
+},
+Bladder:{
+icon:"💧",name:"Urinary Bladder",
+info:"A hollow muscular organ in the pelvis.",
+function:"Stores urine until it is released from the body."
+},
+Skeleton:{
+icon:"🦴",name:"Human Skeleton",
+info:"The skeleton is the body's supporting framework of bones.",
+function:"Supports the body, protects organs and helps movement."
+},
+Muscles:{
+icon:"💪",name:"Muscular System",
+info:"Muscles work together with bones and joints.",
+function:"Produce movement, maintain posture and generate heat."
+},
+Skin:{
+icon:"🖐️",name:"Human Skin",
+info:"Skin is the body's largest organ and covers the external body surface.",
+function:"Protects the body and helps regulate temperature."
+},
+Thyroid:{
+icon:"🦋",name:"Thyroid Gland",
+info:"A butterfly-shaped gland located in the front of the neck.",
+function:"Produces hormones that regulate metabolism."
+}
+};
+
+function show(key){
+const o=organs[key];
+if(!o)return;
+document.getElementById("details").innerHTML=`
+<h2>${o.icon} ${o.name}</h2>
+<p>${o.info}</p>
+<h3 style="color:#39dfff">Main Function</h3>
+<p>${o.function}</p>
+<button onclick="show('Brain')">Explore Brain</button>
+`;
+}
+</script>
 
 </body>
   </html>
