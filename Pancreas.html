@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Pancreas</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;
+ background:radial-gradient(circle,#24172d,#03040a 85%);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ overflow:hidden;
+}
+h2{color:#ffbb88;letter-spacing:2px;text-align:center}
+canvas{
+ width:min(95vw,650px);
+ height:min(65vh,500px);
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+.status{font-size:22px;color:#ffbd77;font-weight:bold}
+button{
+ background:#a95134;color:white;border:0;
+ padding:12px 22px;border-radius:25px;
+ margin:8px;cursor:pointer;
+}
+button:hover{background:#e77a4c}
+</style>
+</head>
+<body>
+
+<h2>🧬 VIRTUAL HUMAN PANCREAS</h2>
+<canvas id="pancreas"></canvas>
+
+<div class="info">
+ <div>HUMAN ENDOCRINE & DIGESTIVE SYSTEM</div>
+ <div class="status" id="status">PANCREAS ACTIVE</div>
+ <div id="activity">Insulin & Enzyme Simulation: Active</div>
+ <button onclick="toggle()">Pause / Resume</button>
+ <button onclick="changeSpeed()">Activity Speed</button>
+</div>
+
+<script>
+const canvas=document.getElementById("pancreas");
+const ctx=canvas.getContext("2d");
+let W,H,time=0,paused=false,speed=1;
+
+function resize(){
+ const d=devicePixelRatio||1;
+ W=canvas.clientWidth;H=canvas.clientHeight;
+ canvas.width=W*d;canvas.height=H*d;
+ ctx.setTransform(d,0,0,d,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function line(x1,y1,x2,y2,color,width){
+ ctx.beginPath();
+ ctx.moveTo(x1,y1);
+ ctx.lineTo(x2,y2);
+ ctx.strokeStyle=color;
+ ctx.lineWidth=width;
+ ctx.lineCap="round";
+ ctx.lineJoin="round";
+ ctx.stroke();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ if(!paused)time+=.025*speed;
+
+ let cx=W/2,cy=H/2;
+
+ // Pancreas main shape
+ ctx.save();
+ ctx.translate(cx,cy);
+ ctx.rotate(Math.sin(time)*.025);
+
+ ctx.beginPath();
+ ctx.moveTo(-155,-5);
+ ctx.bezierCurveTo(-180,-55,-115,-80,-65,-48);
+ ctx.bezierCurveTo(-10,-80,55,-85,115,-48);
+ ctx.bezierCurveTo(165,-30,170,10,120,30);
+ ctx.bezierCurveTo(65,55,5,42,-50,35);
+ ctx.bezierCurveTo(-100,65,-145,45,-155,-5);
+ ctx.closePath();
+
+ let g=ctx.createLinearGradient(-150,-70,150,70);
+ g.addColorStop(0,"#f9b77f");
+ g.addColorStop(.5,"#df845e");
+ g.addColorStop(1,"#a94e40");
+
+ ctx.fillStyle=g;
+ ctx.shadowColor="#ff9865";
+ ctx.shadowBlur=25;
+ ctx.fill();
+ ctx.shadowBlur=0;
+ ctx.strokeStyle="#ffd0a6";
+ ctx.lineWidth=3;
+ ctx.stroke();
+
+ // Pancreatic duct
+ ctx.beginPath();
+ ctx.moveTo(-130,0);
+ ctx.bezierCurveTo(-50,-10,20,10,115,-5);
+ ctx.strokeStyle="#4be1c4";
+ ctx.lineWidth=6;
+ ctx.stroke();
+
+ // Duct branches
+ for(let i=0;i<8;i++){
+  let x=-105+i*29;
+  ctx.beginPath();
+  ctx.moveTo(x,0);
+  ctx.lineTo(x-5,-18);
+  ctx.strokeStyle="#8bf4d7";
+  ctx.lineWidth=2;
+  ctx.stroke();
+ }
+
+ ctx.restore();
+
+ // Duodenum curve near head
+ ctx.beginPath();
+ ctx.moveTo(cx+140,cy-80);
+ ctx.bezierCurveTo(cx+215,cy-70,cx+215,cy+80,cx+135,cy+85);
+ ctx.strokeStyle="#eaa0a0";
+ ctx.lineWidth=18;
+ ctx.lineCap="round";
+ ctx.stroke();
+
+ // Blood vessels
+ line(cx-40,cy-80,cx-40,cy-125,"#e94860",8);
+ line(cx+20,cy-75,cx+20,cy-130,"#408fe8",8);
+
+ // Insulin particles
+ for(let i=0;i<12;i++){
+  let p=(time*45*speed+i*27)%150;
+  let x=cx-100+p;
+  let y=cy-35+Math.sin(i*2+p*.04)*18;
+  ctx.beginPath();
+  ctx.arc(x,y,4,0,Math.PI*2);
+  ctx.fillStyle="#51e6a0";
+  ctx.shadowBlur=12;
+  ctx.shadowColor="#51e6a0";
+  ctx.fill();
+  ctx.shadowBlur=0;
+ }
+
+ // Enzyme particles
+ for(let i=0;i<10;i++){
+  let p=(time*35*speed+i*31)%130;
+  let x=cx+110+p*.25;
+  let y=cy+Math.sin(p*.08+i)*40;
+  ctx.beginPath();
+  ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle="#ffe27b";
+  ctx.shadowBlur=10;
+  ctx.shadowColor="#ffe27b";
+  ctx.fill();
+  ctx.shadowBlur=0;
+ }
+
+ // Labels
+ ctx.font="bold 12px Arial";
+ ctx.fillStyle="#ffd0a6";
+ ctx.fillText("TAIL",cx-160,cy-75);
+ ctx.fillText("BODY",cx-15,cy-85);
+ ctx.fillText("HEAD",cx+95,cy+65);
+ ctx.fillStyle="#72e9d0";
+ ctx.fillText("PANCREATIC DUCT",cx-55,cy+80);
+
+ requestAnimationFrame(draw);
+}
+
+function toggle(){
+ paused=!paused;
+ document.getElementById("status").innerText=
+ paused?"PAUSED":"PANCREAS ACTIVE";
+}
+
+function changeSpeed(){
+ speed=speed===1?2:speed===2?3:1;
+ document.getElementById("activity").innerText=
+ "Activity Animation Speed: "+speed+"x";
+}
+draw();
+</script>
+</body>
+</html>

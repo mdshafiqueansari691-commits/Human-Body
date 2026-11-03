@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Stomach</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;
+ background:radial-gradient(circle,#291b32,#05040b 80%);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ overflow:hidden;
+}
+h2{color:#ffad9c;letter-spacing:2px}
+canvas{
+ width:min(95vw,650px);
+ height:min(65vh,500px);
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+.status{font-size:23px;color:#ff9eae;font-weight:bold}
+button{
+ background:#a83b52;color:white;border:0;
+ padding:12px 25px;border-radius:25px;
+ margin:10px;cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>🫃 VIRTUAL HUMAN STOMACH</h2>
+<canvas id="stomach"></canvas>
+
+<div class="info">
+ <div>HUMAN DIGESTIVE SYSTEM</div>
+ <div class="status" id="status">DIGESTION ACTIVE</div>
+ <div id="activity">Gastric Activity: Normal</div>
+ <button onclick="toggle()">Pause / Resume</button>
+ <button onclick="changeSpeed()">Digestion Speed</button>
+</div>
+
+<script>
+const canvas=document.getElementById("stomach");
+const ctx=canvas.getContext("2d");
+let W,H,time=0,paused=false,speed=1;
+
+function resize(){
+ let d=devicePixelRatio||1;
+ W=canvas.clientWidth;H=canvas.clientHeight;
+ canvas.width=W*d;canvas.height=H*d;
+ ctx.setTransform(d,0,0,d,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function line(x1,y1,x2,y2,color,width){
+ ctx.beginPath();
+ ctx.moveTo(x1,y1);
+ ctx.lineTo(x2,y2);
+ ctx.strokeStyle=color;
+ ctx.lineWidth=width;
+ ctx.lineCap="round";
+ ctx.stroke();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ if(!paused)time+=.025*speed;
+
+ let cx=W/2,cy=H/2;
+ let squeeze=1+Math.sin(time*2)*.035;
+
+ // Esophagus
+ line(cx-15,cy-190,cx-15,cy-90,"#ffb3ad",15);
+
+ // Stomach shape
+ ctx.save();
+ ctx.translate(cx,cy);
+ ctx.scale(squeeze,1);
+
+ ctx.beginPath();
+ ctx.moveTo(-15,-105);
+ ctx.bezierCurveTo(-105,-140,-145,-50,-115,20);
+ ctx.bezierCurveTo(-100,90,-35,135,45,110);
+ ctx.bezierCurveTo(115,85,120,30,95,-5);
+ ctx.bezierCurveTo(70,-40,55,-70,85,-100);
+ ctx.bezierCurveTo(30,-75,10,-80,-15,-105);
+ ctx.closePath();
+
+ let g=ctx.createRadialGradient(-35,-30,10,0,0,160);
+ g.addColorStop(0,"#ffb5a6");
+ g.addColorStop(.5,"#ec6473");
+ g.addColorStop(1,"#81233e");
+
+ ctx.fillStyle=g;
+ ctx.shadowColor="#ff597b";
+ ctx.shadowBlur=25;
+ ctx.fill();
+ ctx.shadowBlur=0;
+ ctx.strokeStyle="#ffc1b6";
+ ctx.lineWidth=3;
+ ctx.stroke();
+
+ // Inner stomach folds
+ ctx.strokeStyle="rgba(255,220,210,.45)";
+ ctx.lineWidth=3;
+ for(let i=0;i<5;i++){
+  ctx.beginPath();
+  ctx.moveTo(-90+i*10,-25+i*10);
+  ctx.quadraticCurveTo(-20,20+i*12,55,65-i*5);
+  ctx.stroke();
+ }
+
+ // Digestive fluid
+ ctx.beginPath();
+ ctx.ellipse(0,72,65,22,0,0,Math.PI*2);
+ ctx.fillStyle="rgba(255,221,95,.55)";
+ ctx.fill();
+
+ ctx.restore();
+
+ // Food particles moving downward
+ for(let i=0;i<10;i++){
+  let y=cy-180+(time*45*speed+i*28)%260;
+  let x=cx-15+Math.sin(i*2)*12;
+  ctx.beginPath();
+  ctx.arc(x,y,4,0,Math.PI*2);
+  ctx.fillStyle="#ffdc70";
+  ctx.shadowColor="#ffb83f";
+  ctx.shadowBlur=12;
+  ctx.fill();
+  ctx.shadowBlur=0;
+ }
+
+ // Digestive juice bubbles
+ for(let i=0;i<12;i++){
+  let a=time*1.5+i;
+  let x=cx+Math.sin(a*1.4)*55;
+  let y=cy+35+Math.cos(a)*25;
+  ctx.beginPath();
+  ctx.arc(x,y,3+(i%3),0,Math.PI*2);
+  ctx.fillStyle="#fff2a5";
+  ctx.fill();
+ }
+
+ // Duodenum
+ line(cx+90,cy+30,cx+140,cy+45,"#ffad9e",13);
+ line(cx+140,cy+45,cx+140,cy+115,"#ffad9e",13);
+
+ requestAnimationFrame(draw);
+}
+
+function toggle(){
+ paused=!paused;
+ document.getElementById("status").innerText=
+ paused?"PAUSED":"DIGESTION ACTIVE";
+}
+
+function changeSpeed(){
+ speed=speed===1?2:speed===2?3:1;
+ document.getElementById("activity").innerText=
+ "Gastric Animation Speed: "+speed+"x";
+}
+
+draw();
+</script>
+</body>
+</html>

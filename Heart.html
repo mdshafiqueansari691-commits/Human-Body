@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Heart ❤️</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: radial-gradient(circle, #25000b, #050008 75%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+h2 {
+  color: #ff526c;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
+
+.scene {
+  width: 300px;
+  height: 350px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 900px;
+}
+
+.heart {
+  width: 170px;
+  height: 170px;
+  position: relative;
+  transform: rotate(-45deg);
+  animation: heartbeat 1s infinite;
+  filter: drop-shadow(0 0 25px #ff123b);
+}
+
+.heart::before,
+.heart::after {
+  content: "";
+  width: 170px;
+  height: 170px;
+  background: radial-gradient(circle at 30% 25%,
+    #ff8290, #e50032 40%, #790018 85%);
+  border-radius: 50%;
+  position: absolute;
+}
+
+.heart::before {
+  top: -85px;
+  left: 0;
+}
+
+.heart::after {
+  left: 85px;
+  top: 0;
+}
+
+.core {
+  width: 170px;
+  height: 170px;
+  background: radial-gradient(circle at 30% 25%,
+    #ff9a9f, #e60035 45%, #650015);
+  position: absolute;
+  border-radius: 18px;
+  z-index: 1;
+  box-shadow: inset -15px -15px 30px #47000c,
+              inset 10px 10px 20px #ff526b;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: rotate(-45deg) scale(1); }
+  15% { transform: rotate(-45deg) scale(1.12); }
+  30% { transform: rotate(-45deg) scale(1); }
+  45% { transform: rotate(-45deg) scale(1.08); }
+  60% { transform: rotate(-45deg) scale(1); }
+}
+
+.vessel {
+  position: absolute;
+  z-index: 5;
+  width: 19px;
+  border-radius: 20px;
+  background: linear-gradient(90deg,#79001b,#ff6478,#9b001f);
+  box-shadow: 0 0 10px #ff334d;
+}
+
+.v1 {
+  height: 95px;
+  top: -115px;
+  left: 72px;
+}
+
+.v2 {
+  height: 80px;
+  top: -90px;
+  left: 115px;
+  transform: rotate(25deg);
+}
+
+.v3 {
+  height: 90px;
+  top: -80px;
+  left: 30px;
+  transform: rotate(-25deg);
+}
+
+.blue {
+  position: absolute;
+  width: 13px;
+  height: 85px;
+  background: linear-gradient(#53c9ff,#0753c5);
+  border-radius: 20px;
+  z-index: 6;
+  top: -95px;
+  left: 92px;
+  transform: rotate(12deg);
+  box-shadow: 0 0 12px #008cff;
+}
+
+.info {
+  margin-top: 15px;
+  text-align: center;
+  line-height: 2;
+}
+
+.bpm {
+  font-size: 30px;
+  font-weight: bold;
+  color: #ff4965;
+}
+
+button {
+  background: #e60035;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 30px;
+  margin-top: 15px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ff315b;
+}
+</style>
+</head>
+
+<body>
+
+<h2>❤️ VIRTUAL HUMAN HEART</h2>
+
+<div class="scene">
+  <div class="heart" id="heart">
+    <div class="core"></div>
+    <div class="vessel v1"></div>
+    <div class="vessel v2"></div>
+    <div class="vessel v3"></div>
+    <div class="blue"></div>
+  </div>
+</div>
+
+<div class="info">
+  <div>❤️ Heartbeat Monitor</div>
+  <div class="bpm" id="bpm">72 BPM</div>
+  <div id="status">● Heart is beating</div>
+  <button onclick="changeSpeed()">Change Heartbeat</button>
+</div>
+
+<script>
+let speed = 1;
+const heart = document.getElementById("heart");
+
+function changeSpeed() {
+  speed = speed === 1 ? 0.5 : speed === 0.5 ? 1.5 : 1;
+  heart.style.animationDuration = speed + "s";
+
+  let bpm = Math.round(120 / speed);
+  document.getElementById("bpm").innerText = bpm + " BPM";
+}
+</script>
+
+</body>
+</html>

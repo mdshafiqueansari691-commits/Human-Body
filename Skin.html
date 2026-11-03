@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full Human Body Skin</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:radial-gradient(circle,#29303d,#070910);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ min-height:100vh;
+}
+h2{color:#ffc09d;text-align:center}
+canvas{
+ width:min(95vw,650px);
+ height:70vh;
+ max-height:650px;
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+button{
+ background:#b86c50;color:white;border:0;
+ padding:12px 22px;border-radius:25px;
+ margin:7px;cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>🧍 FULL HUMAN SKIN MODEL</h2>
+<canvas id="body"></canvas>
+
+<div class="info">
+ <div id="status">HUMAN SKIN – FRONT VIEW</div>
+ <div>Complete Human Body Surface</div>
+ <button onclick="changeView()">Front / Back</button>
+ <button onclick="toggle()">Pause / Resume</button>
+</div>
+
+<script>
+const canvas=document.getElementById("body");
+const ctx=canvas.getContext("2d");
+let W,H,back=false,paused=false,time=0,angle=0;
+
+function resize(){
+ let d=devicePixelRatio||1;
+ W=canvas.clientWidth;H=canvas.clientHeight;
+ canvas.width=W*d;canvas.height=H*d;
+ ctx.setTransform(d,0,0,d,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function shape(x,y,rx,ry,rot=0){
+ ctx.save();
+ ctx.translate(x,y);
+ ctx.rotate(rot);
+ ctx.beginPath();
+ ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);
+
+ let g=ctx.createLinearGradient(-rx,0,rx,0);
+ g.addColorStop(0,"#a95e4b");
+ g.addColorStop(.3,"#edb18b");
+ g.addColorStop(.7,"#d99170");
+ g.addColorStop(1,"#98523f");
+
+ ctx.fillStyle=g;
+ ctx.fill();
+ ctx.strokeStyle="rgba(255,218,191,.4)";
+ ctx.lineWidth=1.5;
+ ctx.stroke();
+ ctx.restore();
+}
+
+function line(x1,y1,x2,y2,width=20){
+ ctx.beginPath();
+ ctx.moveTo(x1,y1);
+ ctx.lineTo(x2,y2);
+ ctx.lineWidth=width;
+ ctx.lineCap="round";
+ ctx.strokeStyle="#d99a78";
+ ctx.stroke();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ if(!paused)time+=.02;
+
+ let cx=W/2,cy=H/2;
+ ctx.save();
+ ctx.translate(cx,cy);
+ ctx.rotate(Math.sin(angle)*.06);
+
+ // Head
+ shape(0,-245,31,40);
+
+ // Ears
+ shape(-32,-245,7,13);
+ shape(32,-245,7,13);
+
+ // Neck
+ shape(0,-190,19,30);
+
+ // Shoulders
+ shape(-55,-155,32,27,-.2);
+ shape(55,-155,32,27,.2);
+
+ // Torso
+ ctx.beginPath();
+ ctx.moveTo(-42,-180);
+ ctx.quadraticCurveTo(-80,-120,-57,-40);
+ ctx.lineTo(-43,15);
+ ctx.quadraticCurveTo(0,35,43,15);
+ ctx.lineTo(57,-40);
+ ctx.quadraticCurveTo(80,-120,42,-180);
+ ctx.closePath();
+
+ let g=ctx.createLinearGradient(-65,0,65,0);
+ g.addColorStop(0,"#a65a46");
+ g.addColorStop(.5,"#e9ae88");
+ g.addColorStop(1,"#a65a46");
+ ctx.fillStyle=g;
+ ctx.fill();
+
+ // Arms
+ for(let side of [-1,1]){
+  line(side*67,-150,side*86,-50,23);
+  shape(side*86,-45,12,16);
+  line(side*86,-35,side*91,48,17);
+  shape(side*91,65,11,20);
+  for(let i=0;i<5;i++){
+   line(side*(85+i*3),78,side*(85+i*3),103,4);
+  }
+ }
+
+ // Legs
+ line(-22,10,-29,140,32);
+ line(22,10,29,140,32);
+
+ shape(-29,145,17,20);
+ shape(29,145,17,20);
+
+ line(-29,155,-32,245,21);
+ line(29,155,32,245,21);
+
+ // Feet
+ shape(-35,265,23,12);
+ shape(35,265,23,12);
+
+ // Skin surface pores
+ for(let i=0;i<220;i++){
+  let x=Math.sin(i*127.1)*65;
+  let y=Math.cos(i*73.7)*125;
+  ctx.beginPath();
+  ctx.arc(x,y,0.65,0,Math.PI*2);
+  ctx.fillStyle="rgba(95,48,35,.28)";
+  ctx.fill();
+ }
+
+ // Back/front visual marker
+ ctx.font="bold 12px Arial";
+ ctx.fillStyle="#fff";
+ ctx.fillText(back?"BACK VIEW":"FRONT VIEW",-35,-300);
+
+ ctx.restore();
+
+ // Animated light
+ ctx.beginPath();
+ ctx.arc(W/2+Math.sin(time)*100,H/2-100,3,0,Math.PI*2);
+ ctx.fillStyle="#ffe1c1";
+ ctx.shadowBlur=15;
+ ctx.shadowColor="#ffbb99";
+ ctx.fill();
+ ctx.shadowBlur=0;
+
+ requestAnimationFrame(draw);
+}
+
+function changeView(){
+ back=!back;
+ angle+=Math.PI;
+ document.getElementById("status").innerText=
+ back?"HUMAN SKIN – BACK VIEW":"HUMAN SKIN – FRONT VIEW";
+}
+function toggle(){
+ paused=!paused;
+}
+draw();
+</script>
+</body>
+</html>

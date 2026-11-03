@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Intestines</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;
+ background:radial-gradient(circle,#25172c,#03050c 85%);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ overflow:hidden;
+}
+h2{color:#ffadad;letter-spacing:2px;text-align:center}
+canvas{
+ width:min(95vw,650px);
+ height:min(65vh,500px);
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+.status{font-size:22px;color:#6deaff;font-weight:bold}
+button{
+ background:#a83b52;color:white;border:0;
+ padding:12px 22px;border-radius:25px;
+ margin:8px;cursor:pointer;
+}
+button:hover{background:#e65373}
+</style>
+</head>
+<body>
+
+<h2>🧬 VIRTUAL HUMAN INTESTINES</h2>
+<canvas id="gut"></canvas>
+
+<div class="info">
+ <div>HUMAN DIGESTIVE SYSTEM</div>
+ <div class="status" id="status">DIGESTION ACTIVE</div>
+ <div id="activity">Intestinal Movement: Active</div>
+ <button onclick="toggle()">Pause / Resume</button>
+ <button onclick="changeSpeed()">Movement Speed</button>
+</div>
+
+<script>
+const canvas=document.getElementById("gut");
+const ctx=canvas.getContext("2d");
+
+let W,H,time=0,paused=false,speed=1;
+
+function resize(){
+ const d=devicePixelRatio||1;
+ W=canvas.clientWidth;
+ H=canvas.clientHeight;
+ canvas.width=W*d;
+ canvas.height=H*d;
+ ctx.setTransform(d,0,0,d,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function tube(points,color,width){
+ ctx.beginPath();
+ ctx.moveTo(points[0][0],points[0][1]);
+ for(let i=1;i<points.length;i++){
+  ctx.lineTo(points[i][0],points[i][1]);
+ }
+ ctx.strokeStyle=color;
+ ctx.lineWidth=width;
+ ctx.lineCap="round";
+ ctx.lineJoin="round";
+ ctx.stroke();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ if(!paused)time+=.025*speed;
+
+ let cx=W/2,cy=H/2;
+
+ // Large intestine - outer colon
+ ctx.save();
+ ctx.lineWidth=34;
+ ctx.lineCap="round";
+ ctx.lineJoin="round";
+
+ ctx.beginPath();
+ ctx.moveTo(cx-105,cy+110);
+ ctx.lineTo(cx-105,cy-105);
+ ctx.quadraticCurveTo(cx-105,cy-135,cx-65,cy-135);
+ ctx.lineTo(cx+75,cy-135);
+ ctx.quadraticCurveTo(cx+110,cy-135,cx+110,cy-100);
+ ctx.lineTo(cx+110,cy+95);
+ ctx.quadraticCurveTo(cx+110,cy+130,cx+70,cy+130);
+ ctx.lineTo(cx+10,cy+130);
+
+ let grad=ctx.createLinearGradient(cx-120,cy,cx+120,cy);
+ grad.addColorStop(0,"#b84c56");
+ grad.addColorStop(.5,"#ff9b9b");
+ grad.addColorStop(1,"#b84c56");
+
+ ctx.strokeStyle=grad;
+ ctx.shadowBlur=18;
+ ctx.shadowColor="#ff637c";
+ ctx.stroke();
+ ctx.shadowBlur=0;
+
+ // Colon segments
+ ctx.strokeStyle="rgba(255,205,200,.5)";
+ ctx.lineWidth=3;
+ for(let i=0;i<12;i++){
+  let x=cx-105+i*19;
+  ctx.beginPath();
+  if(i<10){
+   ctx.moveTo(x,cy-150);
+   ctx.lineTo(x,cy-120);
+  }
+  ctx.stroke();
+ }
+ ctx.restore();
+
+ // Small intestine coils
+ ctx.save();
+ ctx.lineCap="round";
+ ctx.lineJoin="round";
+
+ for(let j=0;j<5;j++){
+  ctx.beginPath();
+  let yy=cy-65+j*34;
+  ctx.moveTo(cx-65,yy);
+  ctx.bezierCurveTo(cx-20,yy-30,cx+25,yy+30,cx+65,yy);
+  ctx.bezierCurveTo(cx+105,yy-30,cx+40,yy-30,cx+5,yy+4);
+  ctx.bezierCurveTo(cx-35,yy+35,cx-5,yy+35,cx+55,yy+5);
+
+  ctx.strokeStyle="#e87991";
+  ctx.lineWidth=11;
+  ctx.shadowColor="#ff8ca8";
+  ctx.shadowBlur=12;
+  ctx.stroke();
+ }
+ ctx.restore();
+
+ // Cecum
+ ctx.beginPath();
+ ctx.ellipse(cx-105,cy+110,22,28,0,0,Math.PI*2);
+ ctx.fillStyle="#ce6470";
+ ctx.fill();
+
+ // Appendix
+ tube([
+  [cx-120,cy+115],
+  [cx-145,cy+140],
+  [cx-150,cy+165]
+ ],"#ff9b9b",9);
+
+ // Rectum
+ tube([
+  [cx+10,cy+130],
+  [cx+10,cy+165],
+  [cx+10,cy+190]
+ ],"#ff9b9b",25);
+
+ // Food movement particles
+ for(let i=0;i<18;i++){
+  let t=(time*35*speed+i*23)%250;
+  let x,y;
+
+  if(t<100){
+   x=cx-45+Math.sin(t*.08)*55;
+   y=cy-65+(t%100);
+  }else{
+   x=cx+Math.sin(t*.1)*60;
+   y=cy-35+(t-100)*.65;
+  }
+
+  ctx.beginPath();
+  ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle="#ffe38c";
+  ctx.shadowBlur=12;
+  ctx.shadowColor="#ffd75e";
+  ctx.fill();
+  ctx.shadowBlur=0;
+ }
+
+ // Floating particles
+ for(let i=0;i<15;i++){
+  let x=cx-130+(i*29)%260;
+  let y=cy-180+(Math.sin(time+i)*8);
+  ctx.beginPath();
+  ctx.arc(x,y,2,0,Math.PI*2);
+  ctx.fillStyle="#5ce9ff";
+  ctx.fill();
+ }
+
+ ctx.font="bold 12px Arial";
+ ctx.fillStyle="#ffb4c1";
+ ctx.fillText("LARGE INTESTINE",cx-55,cy-165);
+ ctx.fillStyle="#73eaff";
+ ctx.fillText("SMALL INTESTINE",cx-48,cy+5);
+
+ requestAnimationFrame(draw);
+}
+
+function toggle(){
+ paused=!paused;
+ document.getElementById("status").innerText=
+ paused?"PAUSED":"DIGESTION ACTIVE";
+}
+
+function changeSpeed(){
+ speed=speed===1?2:speed===2?3:1;
+ document.getElementById("activity").innerText=
+ "Movement Speed: "+speed+"x";
+}
+draw();
+</script>
+</body>
+</html>

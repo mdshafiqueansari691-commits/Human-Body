@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Lungs</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;
+ background:radial-gradient(circle,#17232d,#03080d 80%);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ overflow:hidden;
+}
+h2{color:#6eeaff;letter-spacing:2px}
+canvas{
+ width:min(95vw,650px);
+ height:min(65vh,500px);
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+.status{font-size:24px;color:#65eaff;font-weight:bold}
+button{
+ border:0;border-radius:25px;
+ padding:12px 25px;margin:10px;
+ background:#087eaa;color:white;
+ font-size:15px;cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>🫁 VIRTUAL HUMAN LUNGS</h2>
+
+<canvas id="lungs"></canvas>
+
+<div class="info">
+ <div>RESPIRATORY SYSTEM</div>
+ <div class="status" id="status">INHALING</div>
+ <div id="breath">Breathing Simulation: Active</div>
+ <button onclick="toggle()">Pause / Resume</button>
+ <button onclick="changeSpeed()">Breathing Speed</button>
+</div>
+
+<script>
+const canvas=document.getElementById("lungs");
+const ctx=canvas.getContext("2d");
+
+let W,H,time=0,paused=false,speed=1;
+
+function resize(){
+ let dpr=window.devicePixelRatio||1;
+ W=canvas.clientWidth;
+ H=canvas.clientHeight;
+ canvas.width=W*dpr;
+ canvas.height=H*dpr;
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function airway(x1,y1,x2,y2,width,color){
+ ctx.beginPath();
+ ctx.moveTo(x1,y1);
+ ctx.lineTo(x2,y2);
+ ctx.lineWidth=width;
+ ctx.lineCap="round";
+ ctx.strokeStyle=color;
+ ctx.stroke();
+}
+
+function lung(cx,cy,scale,side){
+ ctx.save();
+ ctx.translate(cx,cy);
+ ctx.scale(scale,scale);
+
+ // Lung shape
+ ctx.beginPath();
+ ctx.moveTo(0,-110);
+ ctx.bezierCurveTo(-65,-130,-115,-60,-100,30);
+ ctx.bezierCurveTo(-90,110,-40,125,0,90);
+ ctx.bezierCurveTo(12,65,15,-65,0,-110);
+ ctx.closePath();
+
+ let gradient=ctx.createRadialGradient(-25,-20,5,0,0,130);
+ gradient.addColorStop(0,"#ff9d9d");
+ gradient.addColorStop(.5,"#e94b70");
+ gradient.addColorStop(1,"#791b48");
+
+ ctx.fillStyle=gradient;
+ ctx.shadowBlur=25;
+ ctx.shadowColor="#ff4679";
+ ctx.fill();
+ ctx.shadowBlur=0;
+
+ ctx.strokeStyle="#ffb0c1";
+ ctx.lineWidth=2;
+ ctx.stroke();
+
+ // Lung lobes and texture
+ ctx.strokeStyle="rgba(255,210,220,.4)";
+ ctx.lineWidth=2;
+ for(let i=0;i<7;i++){
+  ctx.beginPath();
+  ctx.moveTo(-70+i*18,-65);
+  ctx.quadraticCurveTo(-105+i*17,0,-65+i*12,75);
+  ctx.stroke();
+ }
+
+ ctx.restore();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+
+ if(!paused)time+=.025*speed;
+
+ let breathing=(Math.sin(time)+1)/2;
+ let expansion=1+breathing*.13;
+
+ let cx=W/2,cy=H/2;
+
+ // Trachea
+ airway(cx,cy-180,cx,cy-65,18,"#b9e9ee");
+ airway(cx-5,cy-180,cx-5,cy-65,5,"#55a6bb");
+
+ // Main bronchi
+ airway(cx,cy-65,cx-65,cy-25,13,"#f3a5b3");
+ airway(cx,cy-65,cx+65,cy-25,13,"#f3a5b3");
+
+ // Lungs
+ lung(cx-95,cy+15,expansion,-1);
+ lung(cx+95,cy+15,expansion,1);
+
+ // Bronchial branches
+ for(let side of [-1,1]){
+  let startX=cx+side*65;
+  let startY=cy-25;
+
+  for(let i=0;i<4;i++){
+   let x=startX+side*(i*15);
+   let y=startY+i*28;
+   airway(startX,startY,x,y,5,"#ffcad0");
+   airway(x,y,x+side*22,y+15,3,"#ffd5df");
+   airway(x,y,x-side*12,y+20,2,"#ffb9c8");
+  }
+ }
+
+ // Air particles
+ for(let i=0;i<8;i++){
+  let y=cy-175+((time*35+i*40)%155);
+  ctx.beginPath();
+  ctx.arc(cx+Math.sin(i)*3,y,3,0,Math.PI*2);
+  ctx.fillStyle="#72efff";
+  ctx.shadowBlur=10;
+  ctx.shadowColor="#00ddff";
+  ctx.fill();
+  ctx.shadowBlur=0;
+ }
+
+ document.getElementById("status").innerText=
+ breathing>.5?"INHALING 🌬️":"EXHALING 💨";
+
+ document.getElementById("breath").innerText=
+ "Lung Expansion: "+Math.round(100+breathing*13)+"%";
+
+ requestAnimationFrame(draw);
+}
+
+function toggle(){
+ paused=!paused;
+}
+function changeSpeed(){
+ speed=speed===1?1.5:speed===1.5?2:1;
+}
+
+draw();
+</script>
+</body>
+</html>

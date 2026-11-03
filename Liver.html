@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Liver</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;
+ background:radial-gradient(circle,#29151a,#050509 80%);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ overflow:hidden;
+}
+h2{color:#ff9b72;letter-spacing:2px}
+canvas{
+ width:min(95vw,650px);
+ height:min(65vh,500px);
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+.status{font-size:23px;color:#ff9b72;font-weight:bold}
+button{
+ background:#a84325;color:white;border:0;
+ padding:12px 25px;border-radius:25px;
+ margin:10px;cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>🫀 VIRTUAL HUMAN LIVER</h2>
+<canvas id="liver"></canvas>
+
+<div class="info">
+ <div>HUMAN DIGESTIVE SYSTEM</div>
+ <div class="status" id="status">LIVER ACTIVE</div>
+ <div>Blood Circulation: <span id="flow">Active</span></div>
+ <button onclick="toggle()">Pause / Resume</button>
+ <button onclick="rotate()">Rotate Liver</button>
+</div>
+
+<script>
+const canvas=document.getElementById("liver");
+const ctx=canvas.getContext("2d");
+let W,H,time=0,paused=false,angle=0;
+
+function resize(){
+ let d=window.devicePixelRatio||1;
+ W=canvas.clientWidth;H=canvas.clientHeight;
+ canvas.width=W*d;canvas.height=H*d;
+ ctx.setTransform(d,0,0,d,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function line(x1,y1,x2,y2,color,width){
+ ctx.beginPath();
+ ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+ ctx.strokeStyle=color;ctx.lineWidth=width;
+ ctx.lineCap="round";ctx.stroke();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ if(!paused)time+=.025;
+
+ let cx=W/2,cy=H/2;
+ ctx.save();
+ ctx.translate(cx,cy);
+ ctx.rotate(Math.sin(angle)*.12);
+
+ // Liver shape
+ ctx.beginPath();
+ ctx.moveTo(-165,-25);
+ ctx.bezierCurveTo(-180,-100,-75,-125,5,-90);
+ ctx.bezierCurveTo(80,-125,175,-95,175,-20);
+ ctx.bezierCurveTo(175,40,110,90,40,95);
+ ctx.bezierCurveTo(-30,115,-115,80,-155,35);
+ ctx.bezierCurveTo(-175,15,-180,-5,-165,-25);
+ ctx.closePath();
+
+ let g=ctx.createRadialGradient(-40,-45,10,0,0,200);
+ g.addColorStop(0,"#e78a53");
+ g.addColorStop(.5,"#a94428");
+ g.addColorStop(1,"#541a19");
+
+ ctx.fillStyle=g;
+ ctx.shadowColor="#ff7045";
+ ctx.shadowBlur=30;
+ ctx.fill();
+ ctx.shadowBlur=0;
+ ctx.strokeStyle="#ffb17d";
+ ctx.lineWidth=3;
+ ctx.stroke();
+
+ // Lobe separation
+ ctx.beginPath();
+ ctx.moveTo(15,-88);
+ ctx.quadraticCurveTo(0,0,25,88);
+ ctx.strokeStyle="rgba(255,190,145,.65)";
+ ctx.lineWidth=3;
+ ctx.stroke();
+
+ // Hepatic vessels
+ line(0,-75,0,-10,"#e63252",12);
+ line(0,-10,-75,40,"#e63252",9);
+ line(0,-10,80,30,"#e63252",9);
+
+ // Portal vein
+ line(0,0,0,75,"#328bdf",11);
+ line(0,30,-65,65,"#328bdf",7);
+ line(0,30,70,65,"#328bdf",7);
+
+ // Bile duct
+ line(30,5,30,95,"#62d77a",7);
+ line(30,55,65,85,"#62d77a",5);
+
+ // Blood flowing particles
+ for(let i=0;i<15;i++){
+  let p=(time*35+i*23)%110;
+  let x=(i%2===0?-1:1)*(15+p*.55);
+  let y=-60+p;
+  ctx.beginPath();
+  ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle=i%2===0?"#ff415c":"#61baff";
+  ctx.shadowColor=ctx.fillStyle;
+  ctx.shadowBlur=12;
+  ctx.fill();
+  ctx.shadowBlur=0;
+ }
+
+ // Highlight
+ ctx.beginPath();
+ ctx.ellipse(-75,-50,35,8,-.2,0,Math.PI*2);
+ ctx.fillStyle="rgba(255,220,180,.25)";
+ ctx.fill();
+
+ ctx.restore();
+
+ requestAnimationFrame(draw);
+}
+
+function toggle(){
+ paused=!paused;
+ document.getElementById("status").innerText=
+ paused?"PAUSED":"LIVER ACTIVE";
+}
+function rotate(){
+ angle+=1;
+}
+draw();
+</script>
+</body>
+</html>

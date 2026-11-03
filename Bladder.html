@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Urinary Bladder</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;
+ background:radial-gradient(circle,#152333,#03060d 85%);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ overflow:hidden;
+}
+h2{color:#76ddff;text-align:center;letter-spacing:2px}
+canvas{
+ width:min(95vw,650px);
+ height:min(65vh,500px);
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+.status{font-size:23px;color:#6deaff;font-weight:bold}
+button{
+ background:#087da9;color:white;border:0;
+ padding:12px 22px;border-radius:25px;
+ margin:8px;cursor:pointer;
+}
+button:hover{background:#12bce9}
+</style>
+</head>
+<body>
+
+<h2>🫧 VIRTUAL HUMAN BLADDER</h2>
+<canvas id="bladder"></canvas>
+
+<div class="info">
+ <div>HUMAN URINARY SYSTEM</div>
+ <div class="status" id="status">BLADDER FILLING</div>
+ <div id="level">Urine Level: 0%</div>
+ <button onclick="toggle()">Pause / Resume</button>
+ <button onclick="emptyBladder()">Empty Bladder</button>
+</div>
+
+<script>
+const canvas=document.getElementById("bladder");
+const ctx=canvas.getContext("2d");
+
+let W,H,time=0,paused=false;
+let level=0,direction=1;
+
+function resize(){
+ const d=devicePixelRatio||1;
+ W=canvas.clientWidth;H=canvas.clientHeight;
+ canvas.width=W*d;canvas.height=H*d;
+ ctx.setTransform(d,0,0,d,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function line(x1,y1,x2,y2,color,width){
+ ctx.beginPath();
+ ctx.moveTo(x1,y1);
+ ctx.lineTo(x2,y2);
+ ctx.strokeStyle=color;
+ ctx.lineWidth=width;
+ ctx.lineCap="round";
+ ctx.stroke();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+
+ if(!paused){
+  time+=.025;
+  level+=direction*.12;
+  if(level>=100){level=100;direction=0;}
+ }
+ 
+ let cx=W/2,cy=H/2;
+ let scale=1+level*.0007;
+
+ // Ureters
+ line(cx-70,cy-180,cx-55,cy-70,"#e7c5a2",9);
+ line(cx+70,cy-180,cx+55,cy-70,"#e7c5a2",9);
+
+ // Ureter flow particles
+ for(let i=0;i<8;i++){
+  let y=cy-175+(time*30+i*25)%100;
+  let x=i%2===0?cx-60:cx+60;
+  ctx.beginPath();
+  ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle="#62dfff";
+  ctx.fill();
+ }
+
+ // Bladder outline
+ ctx.save();
+ ctx.translate(cx,cy+15);
+ ctx.scale(scale,scale);
+
+ ctx.beginPath();
+ ctx.moveTo(-65,-75);
+ ctx.bezierCurveTo(-145,-95,-150,25,-100,85);
+ ctx.bezierCurveTo(-60,145,60,145,100,85);
+ ctx.bezierCurveTo(150,25,145,-95,65,-75);
+ ctx.quadraticCurveTo(0,-110,-65,-75);
+ ctx.closePath();
+
+ let g=ctx.createRadialGradient(-35,-30,5,0,0,160);
+ g.addColorStop(0,"#ffb8c6");
+ g.addColorStop(.5,"#dc647f");
+ g.addColorStop(1,"#792c56");
+
+ ctx.fillStyle=g;
+ ctx.shadowBlur=25;
+ ctx.shadowColor="#ff628e";
+ ctx.fill();
+ ctx.shadowBlur=0;
+ ctx.strokeStyle="#ffc0d0";
+ ctx.lineWidth=4;
+ ctx.stroke();
+
+ // Urine inside bladder
+ let liquidHeight=level*1.5;
+ if(level>0){
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(-110,95);
+  ctx.bezierCurveTo(-130,20,-110,-75,-65,-75);
+  ctx.bezierCurveTo(0,-110,65,-75,110,-75);
+  ctx.bezierCurveTo(130,20,130,95,100,105);
+  ctx.lineTo(-100,105);
+  ctx.closePath();
+  ctx.clip();
+
+  ctx.fillStyle="rgba(255,219,89,.65)";
+  ctx.fillRect(-130,105-liquidHeight,260,liquidHeight+30);
+
+  ctx.beginPath();
+  ctx.ellipse(0,105-liquidHeight,105,7,0,0,Math.PI*2);
+  ctx.fillStyle="#fff0a3";
+  ctx.fill();
+  ctx.restore();
+ }
+
+ ctx.restore();
+
+ // Urethra
+ line(cx,cy+145,cx,cy+205,"#e7b1aa",13);
+
+ // Labels
+ ctx.font="bold 12px Arial";
+ ctx.fillStyle="#fff";
+ ctx.fillText("URINARY BLADDER",cx-55,cy-100);
+ ctx.fillStyle="#6ceaff";
+ ctx.fillText("URETHRA",cx+12,cy+200);
+
+ document.getElementById("level").innerText=
+ "Urine Level: "+Math.round(level)+"%";
+
+ document.getElementById("status").innerText=
+ direction===0?"BLADDER FULL":
+ level===0?"BLADDER EMPTY":"BLADDER FILLING";
+
+ requestAnimationFrame(draw);
+}
+
+function toggle(){
+ paused=!paused;
+}
+function emptyBladder(){
+ level=0;
+ direction=1;
+ paused=false;
+}
+
+draw();
+</script>
+</body>
+</html>

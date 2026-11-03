@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Skeleton</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:radial-gradient(circle,#172b3b,#02070e);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ min-height:100vh;
+}
+h2{color:#8deaff;text-align:center;letter-spacing:2px}
+canvas{
+ width:min(95vw,650px);
+ height:70vh;
+ max-height:650px;
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+button{
+ background:#087fa9;color:white;border:0;
+ padding:12px 23px;border-radius:25px;
+ margin:7px;cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>💀 VIRTUAL HUMAN SKELETON</h2>
+<canvas id="skeleton"></canvas>
+
+<div class="info">
+ <div id="status">HUMAN SKELETAL SYSTEM</div>
+ <div>206 Bones – Adult Human Reference</div>
+ <button onclick="toggle()">Pause / Resume</button>
+ <button onclick="rotate()">Rotate Body</button>
+</div>
+
+<script>
+const canvas=document.getElementById("skeleton");
+const ctx=canvas.getContext("2d");
+let W,H,time=0,paused=false,angle=0;
+
+function resize(){
+ let d=devicePixelRatio||1;
+ W=canvas.clientWidth;H=canvas.clientHeight;
+ canvas.width=W*d;canvas.height=H*d;
+ ctx.setTransform(d,0,0,d,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function bone(x1,y1,x2,y2,width=8){
+ ctx.beginPath();
+ ctx.moveTo(x1,y1);
+ ctx.lineTo(x2,y2);
+ ctx.strokeStyle="#e8e4d4";
+ ctx.lineWidth=width;
+ ctx.lineCap="round";
+ ctx.stroke();
+
+ ctx.beginPath();
+ ctx.arc(x1,y1,width/2,0,Math.PI*2);
+ ctx.fillStyle="#fff4d9";
+ ctx.fill();
+
+ ctx.beginPath();
+ ctx.arc(x2,y2,width/2,0,Math.PI*2);
+ ctx.fill();
+}
+
+function joint(x,y,r=6){
+ ctx.beginPath();
+ ctx.arc(x,y,r,0,Math.PI*2);
+ ctx.fillStyle="#fff4d9";
+ ctx.fill();
+ ctx.strokeStyle="#8bdfff";
+ ctx.lineWidth=1.5;
+ ctx.stroke();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+
+ if(!paused)time+=.018;
+
+ let cx=W/2,cy=H/2;
+ let sway=Math.sin(time)*3;
+ let turn=Math.sin(angle)*.13;
+
+ ctx.save();
+ ctx.translate(cx,cy);
+ ctx.rotate(turn);
+
+ let y=-Math.min(H*.06,35);
+
+ // Skull
+ ctx.beginPath();
+ ctx.ellipse(sway,y+48,37,44,0,0,Math.PI*2);
+ ctx.fillStyle="#eee9d8";
+ ctx.fill();
+ ctx.strokeStyle="#ffffff";
+ ctx.lineWidth=2;
+ ctx.stroke();
+
+ // Eye sockets
+ ctx.fillStyle="#253746";
+ ctx.beginPath();
+ ctx.ellipse(sway-13,y+48,9,12,0,0,Math.PI*2);
+ ctx.ellipse(sway+13,y+48,9,12,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Nose
+ ctx.beginPath();
+ ctx.moveTo(sway,y+52);
+ ctx.lineTo(sway-5,y+67);
+ ctx.lineTo(sway+5,y+67);
+ ctx.fillStyle="#52606a";
+ ctx.fill();
+
+ // Jaw
+ ctx.beginPath();
+ ctx.arc(sway,y+65,22,.15,Math.PI-.15);
+ ctx.strokeStyle="#eee9d8";
+ ctx.lineWidth=7;
+ ctx.stroke();
+
+ // Neck vertebrae
+ for(let i=0;i<7;i++){
+  joint(sway,y+100+i*7,4);
+ }
+
+ // Spine
+ let spineX=sway;
+ for(let i=0;i<17;i++){
+  let yy=y+150+i*10;
+  joint(spineX+Math.sin(i*.5)*2,yy,5);
+ }
+
+ // Shoulder bones
+ bone(-55+sway,y+160,55+sway,y+160,9);
+
+ // Ribs
+ for(let i=0;i<12;i++){
+  let yy=y+165+i*10;
+  let width=25+i*2;
+
+  ctx.beginPath();
+  ctx.moveTo(spineX,yy);
+  ctx.quadraticCurveTo(-width*.5,yy-15,-width,yy+8);
+  ctx.strokeStyle="#eee9d8";
+  ctx.lineWidth=5;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(spineX,yy);
+  ctx.quadraticCurveTo(width*.5,yy-15,width,yy+8);
+  ctx.strokeStyle="#eee9d8";
+  ctx.lineWidth=5;
+  ctx.stroke();
+ }
+
+ // Sternum
+ bone(sway,y+165,sway,y+260,9);
+
+ // Pelvis
+ ctx.beginPath();
+ ctx.moveTo(-55,y+290);
+ ctx.quadraticCurveTo(-95,y+320,-65,y+355);
+ ctx.lineTo(-15,y+375);
+ ctx.lineTo(0,y+350);
+ ctx.lineTo(15,y+375);
+ ctx.lineTo(65,y+355);
+ ctx.quadraticCurveTo(95,y+320,55,y+290);
+ ctx.strokeStyle="#eee9d8";
+ ctx.lineWidth=12;
+ ctx.stroke();
+
+ // Arms
+ for(let side of [-1,1]){
+  let shoulder=side*58;
+  let elbow=side*100;
+  let wrist=side*112;
+
+  joint(shoulder,y+160,9);
+  bone(shoulder,y+160,elbow,y+235,9);
+  joint(elbow,y+235,8);
+  bone(elbow,y+235,wrist,y+310,7);
+  joint(wrist,y+310,7);
+
+  // Hands and fingers
+  bone(wrist,y+310,wrist+side*12,y+332,5);
+  for(let f=0;f<4;f++){
+   let fx=wrist+side*(10+f*6);
+   bone(fx,y+327,fx+side*5,y+346,3);
+  }
+  bone(wrist,y+310,wrist-side*10,y+332,4);
+ }
+
+ // Legs
+ for(let side of [-1,1]){
+  let hip=side*35;
+  let knee=side*48;
+  let ankle=side*45;
+
+  joint(hip,y+350,9);
+  bone(hip,y+350,knee,y+465,12);
+  joint(knee,y+465,10);
+  bone(knee,y+465,ankle,y+575,9);
+  joint(ankle,y+575,7);
+
+  // Feet
+  bone(ankle,y+575,ankle+side*32,y+588,7);
+  for(let t=0;t<5;t++){
+   bone(
+    ankle+side*22,y+585+t*2,
+    ankle+side*(34+t*4),y+591+t*2,3
+   );
+  }
+ }
+
+ ctx.restore();
+
+ requestAnimationFrame(draw);
+}
+
+function toggle(){
+ paused=!paused;
+ document.getElementById("status").innerText=
+ paused?"SKELETON PAUSED":"SKELETAL SYSTEM ACTIVE";
+}
+function rotate(){
+ angle+=1;
+}
+
+draw();
+</script>
+</body>
+</html>

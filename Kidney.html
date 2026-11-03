@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Human Kidneys</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;
+ background:radial-gradient(circle,#17152d,#03040b 80%);
+ color:white;font-family:Arial;
+ display:flex;flex-direction:column;
+ align-items:center;justify-content:center;
+ overflow:hidden;
+}
+h2{color:#ff858d;letter-spacing:2px}
+canvas{
+ width:min(95vw,650px);
+ height:min(65vh,500px);
+ touch-action:pan-y;
+}
+.info{text-align:center;line-height:2}
+.status{font-size:23px;color:#65eaff;font-weight:bold}
+button{
+ background:#a52b52;color:white;border:0;
+ padding:12px 25px;border-radius:25px;
+ margin:10px;cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>🫘 VIRTUAL HUMAN KIDNEYS</h2>
+<canvas id="kidney"></canvas>
+
+<div class="info">
+ <div>HUMAN URINARY SYSTEM</div>
+ <div class="status" id="status">FILTRATION ACTIVE</div>
+ <div id="flow">Blood Filtration: Active</div>
+ <button onclick="toggle()">Pause / Resume</button>
+ <button onclick="speed()">Filtration Speed</button>
+</div>
+
+<script>
+const canvas=document.getElementById("kidney");
+const ctx=canvas.getContext("2d");
+let W,H,time=0,paused=false,rate=1;
+
+function resize(){
+ let d=devicePixelRatio||1;
+ W=canvas.clientWidth;H=canvas.clientHeight;
+ canvas.width=W*d;canvas.height=H*d;
+ ctx.setTransform(d,0,0,d,0,0);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function line(x1,y1,x2,y2,color,width){
+ ctx.beginPath();
+ ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+ ctx.strokeStyle=color;ctx.lineWidth=width;
+ ctx.lineCap="round";ctx.stroke();
+}
+
+function kidney(x,y,side){
+ ctx.save();
+ ctx.translate(x,y);
+ ctx.scale(side,1);
+
+ // Kidney body
+ ctx.beginPath();
+ ctx.moveTo(0,-85);
+ ctx.bezierCurveTo(-100,-120,-125,-25,-85,65);
+ ctx.bezierCurveTo(-55,115,10,90,20,35);
+ ctx.bezierCurveTo(35,0,85,0,60,-35);
+ ctx.bezierCurveTo(35,-65,55,-100,0,-85);
+ ctx.closePath();
+
+ let g=ctx.createRadialGradient(-30,-30,5,0,0,130);
+ g.addColorStop(0,"#ff9a9d");
+ g.addColorStop(.5,"#c73557");
+ g.addColorStop(1,"#64182e");
+
+ ctx.fillStyle=g;
+ ctx.shadowColor="#ff4169";
+ ctx.shadowBlur=25;
+ ctx.fill();
+ ctx.shadowBlur=0;
+ ctx.strokeStyle="#ffb4b9";
+ ctx.lineWidth=3;
+ ctx.stroke();
+
+ // Renal pelvis
+ ctx.beginPath();
+ ctx.moveTo(35,-20);
+ ctx.quadraticCurveTo(65,0,30,25);
+ ctx.quadraticCurveTo(10,40,35,60);
+ ctx.strokeStyle="#ffdb83";
+ ctx.lineWidth=9;
+ ctx.stroke();
+
+ ctx.restore();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ if(!paused)time+=.025*rate;
+
+ let cx=W/2,cy=H/2;
+
+ // Kidneys
+ kidney(cx-105,cy-15,1);
+ kidney(cx+105,cy-15,-1);
+
+ // Main blood vessels
+ line(cx-12,cy-180,cx-12,cy+100,"#e23b55",15);
+ line(cx+12,cy-180,cx+12,cy+100,"#328fe8",13);
+
+ // Renal arteries
+ line(cx-12,cy-45,cx-100,cy-25,"#ed4058",9);
+ line(cx-12,cy-15,cx+100,cy-25,"#ed4058",9);
+
+ // Renal veins
+ line(cx+12,cy+15,cx-100,cy+15,"#328fe8",8);
+ line(cx+12,cy+45,cx+100,cy+15,"#328fe8",8);
+
+ // Ureters
+ line(cx-75,cy+50,cx-65,cy+150,"#f4d27b",7);
+ line(cx+75,cy+50,cx+65,cy+150,"#f4d27b",7);
+
+ // Bladder
+ ctx.beginPath();
+ ctx.ellipse(cx,cy+165,45,32,0,0,Math.PI*2);
+ ctx.fillStyle="#d8a54c";
+ ctx.shadowColor="#ffd77c";
+ ctx.shadowBlur=15;
+ ctx.fill();
+ ctx.shadowBlur=0;
+
+ // Blood flow particles
+ for(let i=0;i<12;i++){
+  let y=cy-175+(time*35*rate+i*25)%260;
+  ctx.beginPath();
+  ctx.arc(cx-12,y,3,0,Math.PI*2);
+  ctx.fillStyle="#ff4e67";
+  ctx.fill();
+ }
+
+ // Urine particles
+ for(let i=0;i<8;i++){
+  let y=cy+50+(time*45*rate+i*30)%105;
+  let side=i%2===0?-1:1;
+  ctx.beginPath();
+  ctx.arc(cx+side*70,y,3,0,Math.PI*2);
+  ctx.fillStyle="#ffe27b";
+  ctx.shadowColor="#ffe27b";
+  ctx.shadowBlur=10;
+  ctx.fill();
+  ctx.shadowBlur=0;
+ }
+
+ requestAnimationFrame(draw);
+}
+
+function toggle(){
+ paused=!paused;
+ document.getElementById("status").innerText=
+ paused?"PAUSED":"FILTRATION ACTIVE";
+}
+function speed(){
+ rate=rate===1?2:rate===2?3:1;
+ document.getElementById("flow").innerText=
+ "Filtration Animation Speed: "+rate+"x";
+}
+draw();
+</script>
+</body>
+</html>
